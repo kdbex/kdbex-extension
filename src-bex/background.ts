@@ -1,34 +1,25 @@
 import { bexBackground } from 'quasar/wrappers';
+import { MessageType, Status } from './communication';
+
+let status: Status = Status.SETUP;
 
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.action.onClicked.addListener((/* tab */) => {
-    // Opens our extension in a new browser window.
-    // Only if a popup isn't defined in the manifest.
-    chrome.tabs.create(
-      {
-        url: chrome.runtime.getURL('www/index.html'),
-      },
-      (/* newTab */) => {
-        // Tab opened.
-      }
-    );
+  console.log('Background script launched');
+  chrome.storage.local.get(['status'], (result) => {
+    if (result.status) {
+      status = result.status;
+    }
   });
 });
 
-declare module '@quasar/app-vite' {
-  interface BexEventMap {
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    log: [{ message: string; data?: any[] }, never];
-    getTime: [never, number];
+export default bexBackground((bridge) => {
+  bridge.on(MessageType.GET_STATUS, ({ respond }) => {
+    respond(status);
+  });
+});
 
-    'storage.get': [{ key: string | null }, any];
-    'storage.set': [{ key: string; value: any }, any];
-    'storage.remove': [{ key: string }, any];
-    /* eslint-enable @typescript-eslint/no-explicit-any */
-  }
-}
-
-export default bexBackground((bridge /* , allActiveConnections */) => {
+/*
+export default bexBackground((bridge /* , allActiveConnections *
   bridge.on('log', ({ data, respond }) => {
     console.log(`[BEX] ${data.message}`, ...(data.data || []));
     respond();
@@ -88,5 +79,5 @@ export default bexBackground((bridge /* , allActiveConnections */) => {
       bridge.send('browserTabUpdated', { tab, changeInfo })
     }
   })
-   */
-});
+   
+*/

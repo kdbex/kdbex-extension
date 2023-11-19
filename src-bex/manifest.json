@@ -14,9 +14,6 @@
     "default_popup": "www/index.html"
   },
 
-  "options_page": "www/index.html#/options",
-  "devtools_page": "www/index.html#/devtools",
-
   "background": {
     "service_worker": "background.js"
   },
