@@ -2,82 +2,57 @@ import { bexBackground } from 'quasar/wrappers';
 import { MessageType, Status } from './communication';
 
 let status: Status = Status.SETUP;
+let loaded = false;
+const loaders: ((status: Status) => void)[] = [];
+let axiosLoader: (data: { url: string; cryptKey: string }) => void;
+let baseUrl = '';
+let cryptKey = '';
 
 chrome.runtime.onInstalled.addListener(() => {
   console.log('Background script launched');
-  chrome.storage.local.get(['status'], (result) => {
+  chrome.storage.local.get(['status', 'url', 'cryptKey'], (result) => {
     if (result.status) {
       status = result.status;
+    }
+    if (result.url) {
+      baseUrl = result.url;
+    }
+    if (result.cryptKey) {
+      cryptKey = result.cryptKey;
+    }
+    if (axiosLoader) {
+      axiosLoader({ url: baseUrl, cryptKey });
+    }
+    loaded = true;
+    for (const loader of loaders) {
+      loader(status);
     }
   });
 });
 
 export default bexBackground((bridge) => {
   bridge.on(MessageType.GET_STATUS, ({ respond }) => {
-    respond(status);
+    if (!loaded) {
+      loaders.push(respond);
+    } else {
+      respond(status);
+    }
+  });
+  bridge.on(MessageType.GET_LOG_INFO, ({ respond }) => {
+    if (!loaded) {
+      axiosLoader = respond;
+    } else {
+      respond(baseUrl);
+    }
+  });
+  bridge.on(MessageType.CORRECT_SETUP, ({ data }) => {
+    status = Status.LOGIN;
+    //We store the url
+    chrome.storage.local.set({
+      status: Status.LOGIN,
+      url: data.url,
+      cryptKey: data.cryptKey,
+    });
+    console.log('I SETUP');
   });
 });
-
-/*
-export default bexBackground((bridge /* , allActiveConnections *
-  bridge.on('log', ({ data, respond }) => {
-    console.log(`[BEX] ${data.message}`, ...(data.data || []));
-    respond();
-  });
-
-  bridge.on('getTime', ({ respond }) => {
-    respond(Date.now());
-  });
-
-  bridge.on('storage.get', ({ data, respond }) => {
-    const { key } = data;
-    if (key === null) {
-      chrome.storage.local.get(null, (items) => {
-        // Group the values up into an array to take advantage of the bridge's chunk splitting.
-        respond(Object.values(items));
-      });
-    } else {
-      chrome.storage.local.get([key], (items) => {
-        respond(items[key]);
-      });
-    }
-  });
-  // Usage:
-  // const { data } = await bridge.send('storage.get', { key: 'someKey' })
-
-  bridge.on('storage.set', ({ data, respond }) => {
-    chrome.storage.local.set({ [data.key]: data.value }, () => {
-      respond();
-    });
-  });
-  // Usage:
-  // await bridge.send('storage.set', { key: 'someKey', value: 'someValue' })
-
-  bridge.on('storage.remove', ({ data, respond }) => {
-    chrome.storage.local.remove(data.key, () => {
-      respond();
-    });
-  });
-  // Usage:
-  // await bridge.send('storage.remove', { key: 'someKey' })
-
-  /*
-  // EXAMPLES
-  // Listen to a message from the client
-  bridge.on('test', d => {
-    console.log(d)
-  })
-
-  // Send a message to the client based on something happening.
-  chrome.tabs.onCreated.addListener(tab => {
-    bridge.send('browserTabCreated', { tab })
-  })
-
-  // Send a message to the client based on something happening.
-  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (changeInfo.url) {
-      bridge.send('browserTabUpdated', { tab, changeInfo })
-    }
-  })
-   
-*/

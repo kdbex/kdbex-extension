@@ -5,21 +5,26 @@
         <q-icon name="event" />
       </template>
     </q-input>
-    <q-input v-model="token" label="Token du serveur"></q-input>
+    <q-input
+      v-model="cryptKey"
+      color="primary"
+      label="Token du serveur"
+    ></q-input>
     <q-btn label="Valider" @click="validate"></q-btn>
   </div>
 </template>
 
 <script lang="ts">
-import axios from 'axios';
+import { api as axios } from 'src/boot/axios';
 import { encrypt } from './model';
+import { MessageType } from 'app/src-bex/communication';
 
 export default {
   name: 'SetupComponent',
   data() {
     return {
       url: '',
-      token: '',
+      cryptKey: '',
     };
   },
   methods: {
@@ -35,16 +40,16 @@ export default {
       axios
         .post(this.url + '/setup', {
           message: testMsg,
-          hash: encrypt(testMsg, this.token),
+          hash: encrypt(testMsg, this.cryptKey),
         })
-        .then((res) => {
-          console.log(res);
+        .then((out) => {
+          if (out.data) {
+            this.$q.bex.send(MessageType.CORRECT_SETUP, {
+              url: this.url,
+              cryptKey: this.cryptKey,
+            });
+          }
         });
-      /*this.$q.bex.setup(this.url, this.token).then(() => {
-        this.$q.bex.send('test', 'hello').then((res) => {
-          console.log(res);
-        });
-      });*/
     },
   },
 };
