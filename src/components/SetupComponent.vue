@@ -1,16 +1,23 @@
 <template>
-  <div>
-    <q-input v-model="url" label="URL" outlined color="primary">
+  <div class="q-pa-md column items-center">
+    <q-input v-model="url" label="URL" class="q-my-sm" outlined color="primary">
       <template v-slot:prepend>
-        <q-icon name="event" />
+        <q-icon name="link" />
       </template>
     </q-input>
     <q-input
       v-model="cryptKey"
       color="primary"
-      label="Token du serveur"
-    ></q-input>
-    <q-btn label="Valider" @click="validate"></q-btn>
+      class="q-my-sm"
+      outlined
+      label="Token"
+    >
+      <template v-slot:prepend>
+        <q-icon name="key" />
+      </template>
+    </q-input>
+
+    <q-btn label="Finish Setup" @click="validate"></q-btn>
   </div>
 </template>
 

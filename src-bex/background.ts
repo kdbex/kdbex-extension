@@ -42,8 +42,12 @@ export default bexBackground((bridge) => {
     if (!loaded) {
       axiosLoader = respond;
     } else {
-      respond(baseUrl);
+      respond({ url: baseUrl, cryptKey });
     }
+  });
+  bridge.on(MessageType.SET_STATUS, ({ data }) => {
+    status = data;
+    bridge.send(MessageType.UPDATE_STATUS, data);
   });
   bridge.on(MessageType.CORRECT_SETUP, ({ data }) => {
     status = Status.LOGIN;
@@ -53,6 +57,6 @@ export default bexBackground((bridge) => {
       url: data.url,
       cryptKey: data.cryptKey,
     });
-    console.log('I SETUP');
+    bridge.send(MessageType.UPDATE_STATUS, Status.LOGIN);
   });
 });

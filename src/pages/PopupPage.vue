@@ -1,16 +1,19 @@
 <template>
   <SetupComponent v-if="setup()" />
+  <LoginComponent v-if="login()" />
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { MessageType, Status } from '../../src-bex/communication';
 import SetupComponent from 'components/SetupComponent.vue';
+import LoginComponent from 'components/LoginComponent.vue';
 
 export default defineComponent({
   name: 'PopupPage',
   components: {
     SetupComponent,
+    LoginComponent,
   },
   data() {
     return {
@@ -29,6 +32,9 @@ export default defineComponent({
   methods: {
     setup() {
       return this.status === Status.SETUP;
+    },
+    login() {
+      return this.status === Status.LOGIN;
     },
   },
 });

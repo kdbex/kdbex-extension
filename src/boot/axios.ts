@@ -1,6 +1,7 @@
 import { boot } from 'quasar/wrappers';
 import axios, { AxiosInstance } from 'axios';
 import { MessageType } from 'app/src-bex/communication';
+import { encrypt } from 'src/components/model';
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
@@ -11,6 +12,7 @@ declare module '@vue/runtime-core' {
 
 let baseUrl: string;
 let token: string;
+let cryptKey: string;
 
 const api = axios.create();
 export default boot(({ app }) => {
@@ -26,11 +28,10 @@ export default boot(({ app }) => {
   });
   waitForBex.then(() => {
     $q.bex.send(MessageType.GET_LOG_INFO, {}).then(({ data }) => {
-      console.log('Got base url', data);
-      baseUrl = data;
+      baseUrl = data.url;
+      cryptKey = data.cryptKey;
     });
     $q.bex.on(MessageType.UPDATE_TOKEN, ({ data }) => {
-      console.log('Got token', data);
       token = data;
     });
   });
@@ -49,6 +50,20 @@ api.interceptors.request.use(
       console.log('Has baseUrl', baseUrl);
       config.url = baseUrl + config.url;
     }
+    console.log(config.data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const obj: any = {}; // Specify a more specific type for obj
+    for (const key in config.data) {
+      if (key.endsWith('TH')) {
+        obj[key.substring(0, key.length - 2)] = encrypt(
+          config.data[key],
+          cryptKey
+        );
+      } else {
+        obj[key] = config.data[key];
+      }
+    }
+    config.data = obj;
     if (token) {
       config.headers['Authorization'] = token;
     }
