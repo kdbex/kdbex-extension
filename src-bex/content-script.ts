@@ -5,8 +5,9 @@ import { bexContent } from 'quasar/wrappers'
 import { Field } from './field';
 import { getMatches, labelInput, observe } from './dom-search';
 import { BexBridge } from '@quasar/app-vite';
-import { Status } from './communication';
+import { MessageType, Status } from './communication';
 window.addEventListener('load', () => onPageLoaded());
+const url = window.location.href.split('://')[1].split('/')[0];
 
 export const shared = {
 	bridge: undefined as BexBridge | undefined,
@@ -40,6 +41,7 @@ function onPageLoaded() {
 		shared.trueData = true;
 		shared.refreshFields();
 	}
+	shared.bridge?.send(MessageType.PAGE_LOADED, {url, need_username: true, need_password: true});
 	/*chrome.runtime.sendMessage(
 		{
 			request: {

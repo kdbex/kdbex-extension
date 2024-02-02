@@ -22,8 +22,7 @@
 </template>
 
 <script lang="ts">
-import { api as axios } from 'src/boot/axios';
-import { encrypt } from './model';
+import { encrypt, post } from './model';
 import { MessageType } from 'app/src-bex/communication';
 
 export default {
@@ -44,17 +43,19 @@ export default {
           Math.floor(Math.random() * characters.length)
         );
       }
-      axios
-        .post(this.url + '/setup', {
+      post(this.$q.bex, this.url + '/setup', {
           message: testMsg,
           hash: encrypt(testMsg, this.cryptKey),
-        })
+
+        }, false)
         .then((out) => {
-          if (out.data) {
+          if (out === 'true') {
             this.$q.bex.send(MessageType.CORRECT_SETUP, {
               url: this.url,
               cryptKey: this.cryptKey,
             });
+          } else {
+            //TODO
           }
         });
     },

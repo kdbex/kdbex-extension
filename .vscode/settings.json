@@ -12,5 +12,24 @@
     "typescript",
     "vue"
   ],
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "restoreTerminals.terminals": [
+        
+    {
+        "splitTerminals": [
+            {
+                "name": "Server",
+                "commands": ["cd server", "npm run start"]
+            }
+        ]
+    },
+    {
+        "splitTerminals": [
+            {
+                "name": "Extension",
+                "commands": ["cd extension", "quasar dev -m bex"]
+            }
+        ]
+    },
+]
 }

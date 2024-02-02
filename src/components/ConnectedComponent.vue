@@ -5,9 +5,6 @@
   </template>
   
   <script lang="ts">
-  import { api as axios } from 'src/boot/axios';
-  import { MessageType, Status } from 'app/src-bex/communication';
-  import { AxiosError } from 'axios';
   
   export default {
     name: 'LoginComponent',

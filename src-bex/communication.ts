@@ -11,13 +11,23 @@ export enum MessageType {
   GET_LOG_INFO = 'GetLogInfo', //cryptkey and url fires from axios to background
   UPDATE_TOKEN = 'UpdateToken', //Whenever the login token is updated, fires from background to boot/axios file
   CORRECT_SETUP = 'CorrectSetup', //When the setup is correct, fires from .vue to background to store in chrome storage
-  PAGE_LOADED = 'PageLoaded', //fires from content to background to tell when page is loaded
+  PAGE_LOADED = 'PageLoaded', //fires from content to background to tell when page is loaded,
+  HTTP = 'Http'//Http request
 }
 
-export interface PageBody {
-	url: string;
-	values: boolean;
-	username: boolean;
-	password: boolean;
-	pageLogged: boolean;
+//Data in the background file that stores everything needed for each tab
+export interface TabData {
+  url: string;//The url of the tab
+  need_data: number;//If the tab needs data (case if > 0)
+  has_data: boolean; //If the tab has data
+  need_username: boolean;
+  need_password: boolean;
+}
+
+export interface KdbexEntry {
+  id: string;
+  name: string;
+  password: string;
+  username: string;
+
 }

@@ -137,6 +137,7 @@ export class Field{
 	}
 
 	animateAction(open: boolean, end: (() => void) | undefined = undefined){
+		end
 		/*this.action.onanimationend = end;
 		const width = Math.round(this.action.getBoundingClientRect().width);
 		let arr = [];

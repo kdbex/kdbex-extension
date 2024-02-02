@@ -18,9 +18,8 @@
 </template>
 
 <script lang="ts">
-import { api as axios } from 'src/boot/axios';
 import { MessageType, Status } from 'app/src-bex/communication';
-import { AxiosError } from 'axios';
+import { post } from './model';
 
 export default {
   name: 'LoginComponent',
@@ -32,7 +31,21 @@ export default {
   },
   methods: {
     login() {
-      axios
+      post(this.$q.bex, '/login', { keyTH: this.password }, false)
+        .then((token) => {
+          this.$q.bex.send(MessageType.UPDATE_TOKEN, token);
+          this.$q.bex.send(MessageType.SET_STATUS, Status.CONNECTED);
+        }).catch((status: number) => {
+          if (status == 401) {
+            this.msg = 'Wrong password';
+          } else {
+            this.msg = 'Internal server error';
+          }
+          setInterval(() => {
+            this.msg = '';
+          }, 3000);
+        });
+      /*axios
         .post('/login', {
           keyTH: this.password,
         })
@@ -51,7 +64,7 @@ export default {
           setInterval(() => {
             this.msg = '';
           }, 3000);
-        });
+        });*/
     },
   },
 };
