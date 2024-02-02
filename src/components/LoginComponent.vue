@@ -18,7 +18,7 @@
 </template>
 
 <script lang="ts">
-import { MessageType, Status } from 'app/src-bex/communication';
+import { MessageType } from 'app/src-bex/communication';
 import { post } from './model';
 
 export default {
@@ -33,8 +33,7 @@ export default {
     login() {
       post(this.$q.bex, '/login', { keyTH: this.password }, false)
         .then((token) => {
-          this.$q.bex.send(MessageType.UPDATE_TOKEN, token);
-          this.$q.bex.send(MessageType.SET_STATUS, Status.CONNECTED);
+          this.$q.bex.send(MessageType.CONNECT, token);
         }).catch((status: number) => {
           if (status == 401) {
             this.msg = 'Wrong password';
@@ -45,26 +44,6 @@ export default {
             this.msg = '';
           }, 3000);
         });
-      /*axios
-        .post('/login', {
-          keyTH: this.password,
-        })
-        .then((res) => res.data)
-        .then((token) => {
-          this.$q.bex.send(MessageType.UPDATE_TOKEN, token);
-          this.$q.bex.send(MessageType.SET_STATUS, Status.CONNECTED);
-        })
-        .catch((err: AxiosError) => {
-          const status = err.response?.status;
-          if (status == 401) {
-            this.msg = 'Wrong password';
-          } else {
-            this.msg = 'Internal server error';
-          }
-          setInterval(() => {
-            this.msg = '';
-          }, 3000);
-        });*/
     },
   },
 };

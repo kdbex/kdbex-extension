@@ -48,6 +48,12 @@ export default bexBackground((bridge) => {
       respond(status);
     }
   });
+  bridge.on(MessageType.CONNECT, ({ data}) => {
+    httpData.token = data;
+    status = Status.CONNECTED;
+    bridge.send(MessageType.UPDATE_STATUS, Status.CONNECTED);
+    checkCurrentTab();
+  });
   bridge.on(MessageType.HTTP, ({ data, respond }) => {
     customhttp(data.url, data.method, data.data, data.json).then((r) => {
       respond({ data: r, error: false })

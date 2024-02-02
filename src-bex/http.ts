@@ -20,19 +20,24 @@ function request(data: { [key: string]: string }): unknown {
         }
         return obj;
 }
-
-function response(data: { [key: string]: string }): unknown {
+function response(data: { [key: string]: unknown }): unknown {
   const obj: { [key: string]: unknown } = {};
   for (const key in data) {
-      if (key.endsWith('Hash')) {
-          obj[key.substring(0, key.length - 4)] = decrypt(
-              data[key],
-              httpData.cryptKey
-          );
-      } else {
-          obj[key] = data[key];
-      }
+    console.log(key);
+    if(typeof(data[key]) !== 'string') {
+      const cp = data[key] as { [key: string]: unknown };
+      obj[key] = response(cp);
+    } else if (key.endsWith('Hash')) {
+      console.log('ui')
+      obj[key.substring(0, key.length - 4)] = decrypt(
+          data[key] as string,
+          httpData.cryptKey
+      );
+    } else {
+      obj[key] = data[key];
+    }
   }
+  console.log(obj);
   return obj;
 }
 

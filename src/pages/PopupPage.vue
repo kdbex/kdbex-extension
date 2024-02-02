@@ -24,9 +24,8 @@ export default defineComponent({
     this.$q.bex.send(MessageType.GET_STATUS).then((res) => {
       this.status = res.data;
     });
-    this.$q.bex.on(MessageType.UPDATE_STATUS, ({ data, respond }) => {
+    this.$q.bex.on(MessageType.UPDATE_STATUS, ({ data }) => {
       this.status = data;
-      respond();
     });
   },
   methods: {
