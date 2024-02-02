@@ -11,4 +11,13 @@ export enum MessageType {
   GET_LOG_INFO = 'GetLogInfo', //cryptkey and url fires from axios to background
   UPDATE_TOKEN = 'UpdateToken', //Whenever the login token is updated, fires from background to boot/axios file
   CORRECT_SETUP = 'CorrectSetup', //When the setup is correct, fires from .vue to background to store in chrome storage
+  PAGE_LOADED = 'PageLoaded', //fires from content to background to tell when page is loaded
+}
+
+export interface PageBody {
+	url: string;
+	values: boolean;
+	username: boolean;
+	password: boolean;
+	pageLogged: boolean;
 }

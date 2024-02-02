@@ -36,23 +36,16 @@ export default boot(({ app }) => {
     });
   });
   app.config.globalProperties.$axios = axios;
-  // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)
-  //       so you won't necessarily have to import axios in each vue file
-
   app.config.globalProperties.$api = api;
-  // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
-  //       so you can easily perform requests against your app's API
 });
 api.interceptors.request.use(
   (config) => {
-    // Do something before request is sent
     if (baseUrl) {
       console.log('Has baseUrl', baseUrl);
       config.url = baseUrl + config.url;
     }
-    console.log(config.data);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const obj: any = {}; // Specify a more specific type for obj
+    const obj: any = {};
     for (const key in config.data) {
       if (key.endsWith('TH')) {
         obj[key.substring(0, key.length - 2)] = encrypt(
@@ -70,7 +63,6 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    // Do something with request error
     return Promise.reject(error);
   }
 );
