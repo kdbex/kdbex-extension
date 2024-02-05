@@ -1,5 +1,5 @@
 import { bexBackground } from 'quasar/wrappers';
-import { Status, TabData } from './bridge';
+import { KdbexEntry, Status, TabData } from './bridge';
 import { httpData, get, customhttp } from './http';
 let status: Status = Status.SETUP;
 let loaded = false;
@@ -32,11 +32,15 @@ chrome.tabs.onActivated.addListener((active) => {
 	tabIndex = active.tabId;
 });
 
-export function checkCurrentTab() {
+export async function checkCurrentTab(): Promise<KdbexEntry[] | null> {
   const current = tabs[tabIndex];
+  if (status !== Status.CONNECTED) {
+    return null;
+  }
   if (current && current.need_data && !current.has_data && status == Status.CONNECTED) {
-    get(`/entries/url/${current.url}/${current.need_data}`).then((r) => console.log('Tab output check', r));
-}
+    return get(`/entries/url/${current.url}/${current.need_data}`).then((r) => r as KdbexEntry[]);
+  }
+  return [];
 }
 
 
@@ -62,11 +66,11 @@ export default bexBackground((bridge) => {
       respond(status);
     }
   });
-  bridge.on('Connect', ({ data}) => {
+  bridge.on('Connect', async ({ data}) => {
     httpData.token = data;
     status = Status.CONNECTED;
     bridge.send('UpdateStatus', Status.CONNECTED);
-    checkCurrentTab();
+    bridge.send('ServiceConnected', await checkCurrentTab());
   });
   bridge.on('Setup', ({ data }) => {
     status = Status.LOGIN;
@@ -78,10 +82,15 @@ export default bexBackground((bridge) => {
     });
     bridge.send('UpdateStatus', Status.LOGIN);
   });
-  bridge.on('PageLoaded', ({ data }) => {
+  bridge.on('PageLoaded', async ({ data, respond }) => {
     tabs[tabIndex] = data as TabData;
     tabs[tabIndex].has_data = false;
     tabs[tabIndex].need_data = (data.need_username ? 1 : 0) + (data.need_password ? 2 : 0);
-    checkCurrentTab();
+    respond(await checkCurrentTab());
   })
+  bridge.on('PageUpdated', async ({ data, respond }) => {
+    tabs[tabIndex] = data as TabData;
+    tabs[tabIndex].need_data = (data.need_username ? 1 : 0) + (data.need_password ? 2 : 0);
+    respond(await checkCurrentTab());
+  });
 });

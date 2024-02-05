@@ -42,12 +42,25 @@ export const shared = {
       url,
       need_username: nu,
       need_password: np,
-    });
+    }).then(({ data }) => fillEntry(data));
   }
 };
 export default bexContent((bridge) => {
   shared.bridge = bridge;
+  bridge.on('ServiceConnected', ({ data}) => {
+    fillEntry(data);
+  });
 });
+
+function fillEntry(data: KdbexEntry[] | null) {
+  shared.status = shared.button ? TabState.DATA : TabState.NODATA;
+  shared.refreshFields();
+  if (data) {
+    console.log('data sent is', data);
+    shared.entries = data;
+    shared.fillEntry(shared.entries[0]);
+  }
+}
 
 //Functions to communicate with the others files
 
@@ -61,6 +74,7 @@ function onPageLoaded() {
   });
   const matches = getMatches(document.body, [null, []]);
   if (matches[0]) {
+    shared.button = matches[0];
     matches[1].forEach((match) => labelInput(match));
     shared.refreshFields();
   } 

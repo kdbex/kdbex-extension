@@ -17,6 +17,8 @@ declare module '@quasar/app-vite' {
       { data: unknown | string; error: boolean }
     ];
     PageLoaded: [{ url: string, need_username: boolean, need_password: boolean }, KdbexEntry[] | null];
+    PageUpdated: [{ url: string, need_username: boolean, need_password: boolean }, KdbexEntry[] | null];
+    ServiceConnected: [KdbexEntry[] | null, never];//When bg is loaded, sends info to the current tab
     EntrySelected: [string, never];
   }
 }

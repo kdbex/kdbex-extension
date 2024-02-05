@@ -115,12 +115,12 @@ export class Field{
 	}
 
 	public refreshField(){
-		if(!shared.button){
+		if(shared.button == null){
 			this.kdbxContainer.innerHTML = '';
 			return;
 		}
-		this.createAction();
 		this.createImage();
+		this.createAction();
 		this.updateField();
 		if(this.animate != null){
 			this.animateAction(this.animate);
