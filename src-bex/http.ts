@@ -23,7 +23,6 @@ function request(data: { [key: string]: string }): unknown {
 function response(data: { [key: string]: unknown }): unknown {
   const obj: { [key: string]: unknown } = {};
   for (const key in data) {
-    console.log(key);
     if(typeof(data[key]) !== 'string') {
       const cp = data[key] as { [key: string]: unknown };
       obj[key] = response(cp);
@@ -37,7 +36,6 @@ function response(data: { [key: string]: unknown }): unknown {
       obj[key] = data[key];
     }
   }
-  console.log(obj);
   return obj;
 }
 

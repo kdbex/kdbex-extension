@@ -1,5 +1,4 @@
 import { BexBridge } from '@quasar/app-vite';
-import { MessageType } from 'app/src-bex/communication';
 import crypto from 'crypto-es';
 
 export function encrypt(message: string, key: string): string {
@@ -23,7 +22,7 @@ export async function post<T extends boolean>(bridge: BexBridge, url: string, da
 }
 
 async function http<T extends boolean>(bridge: BexBridge, url: string, method: 'GET' | 'POST', data: { [key: string]: string }, json: T = true as T): Promise<HttpBody<T>> {
-  const d: {data: HttpBody<T>, error: boolean} = (await bridge.send(MessageType.HTTP, { url, method, data, json })).data;
+  const d = (await bridge.send('Http', { url, method, data, json })).data as { data: HttpBody<T>, error: boolean };
   if (d.error) {
     return Promise.reject(d.data);
   }

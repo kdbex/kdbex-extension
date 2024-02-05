@@ -2,7 +2,8 @@
 /**
  * File that manages all the fields that are detected on the map, and the actions that are linked to them
  */
-import { shared } from './content-script';
+import { TabState, shared } from './content-script';
+import { post } from './http';
 
 
 function px(i: number) {
@@ -60,36 +61,36 @@ export class Field{
 		this.action.style.paddingLeft = px(this.image.getBoundingClientRect().height / 2 + 1);
 		this.action.style.left = px(this.image.getBoundingClientRect().height / 2);
 		this.action.style.background = 'white';
-		/*switch (state) {
-			case State.not_found:
+		switch (shared.status) {
+			case TabState.NOLOG:
 				this.action.innerHTML = 'No entries found for this url.';
 				break;
-			case State.found:
-				let select = document.createElement('select');
+			case TabState.DATA:
+				const select = document.createElement('select');
 				select.classList.add('kdbx-select');
-				for (let elt of entries) {
-					let opt = document.createElement('option');
+				for (const elt of shared.entries) {
+					const opt = document.createElement('option');
 					opt.text = elt.name;
 					opt.value = elt.id;
 					select.appendChild(opt);
 				}
 				select.childNodes.forEach((c) => {
-					let opt: HTMLOptionElement = <HTMLOptionElement>c;
-					if (opt.value == selectedEntry.id) {
+					const opt: HTMLOptionElement = <HTMLOptionElement>c;
+					if (opt.value == shared.selectedEntry?.id) {
 						opt.selected = true;
 					}
 				});
-				select.addEventListener('change', (event) => {
-					let value = select.value;
-					let ne = entries.filter((e) => e.id == value)[0];
-					selectedEntry = ne;
-					fill({ selected: ne, entries: entries });
-					message(Script.CONTENT, Script.BACKGROUND, MessageCode.ENTRY_SELECTION, selectedEntry);
+				select.addEventListener('change', () => {
+					const value = select.value;
+					const ne = shared.entries.filter((e) => e.id == value)[0];
+					shared.fillEntry(ne);
+					shared.selectedEntry = ne;
+					shared.bridge.send('EntrySelected', ne.id);
 				});
 				this.action.appendChild(select);
 				break;
 			default:
-				let pwinput = document.createElement('input');
+				const pwinput = document.createElement('input');
 				pwinput.classList.add('kdbx-input');
 				pwinput.style.all = 'initial';
 				pwinput.style.height = '80%';
@@ -99,19 +100,22 @@ export class Field{
 				pwinput.placeholder = 'Kdbx password';
 				pwinput.onkeydown = (ev) => {
 					if (ev.key == 'Enter') {
-						wheel(this);
-						login(pwinput.value, this);
+						post('/login', { keyTH: pwinput.value}, false).then(token => {
+							shared.bridge.send('Connect', token);
+						  }).catch(() => {
+							//Do smth
+						  });
 					}
 				};
 				this.action.appendChild(pwinput);
 				break;
-		}*/
+		}
 		//We animate it for later
 		this.animate = true;
 	}
 
 	public refreshField(){
-		if(!shared.trueData){
+		if(!shared.button){
 			this.kdbxContainer.innerHTML = '';
 			return;
 		}
@@ -137,10 +141,10 @@ export class Field{
 	}
 
 	animateAction(open: boolean, end: (() => void) | undefined = undefined){
-		end
-		/*this.action.onanimationend = end;
+		if (end) 
+			this.action.onanimationend = end;
 		const width = Math.round(this.action.getBoundingClientRect().width);
-		let arr = [];
+		const arr = [];
 		for(let i = 1; i <= width; i++){
 			arr.push(px(i));
 		} 
@@ -151,7 +155,7 @@ export class Field{
 		}, 250);
 		this.action.children.item(0)?.animate({
 			width: arr
-		}, 250);*/
+		}, 250);
 	}
 }
 

@@ -33,6 +33,20 @@ export function validButton(elt: HTMLElement): boolean {
 
 export type Matches = [HTMLElement | null, HTMLInputElement[]];
 
+
+function elementSearch(matches: Matches, child: HTMLElement) {
+	if (validButton(child)) {
+		matches[0] = child;
+	} else if (validInput(child)) {
+		matches[1].push(child as HTMLInputElement);
+	} else if (child.childElementCount > 0) {
+		const [u, v] = getMatches(child, matches);
+		matches[1] = v;
+		if(u != null)
+			matches[0] = u;
+	} 
+}
+
 /**
  * Will go through the body of the page and return all the matches of fields and button, recursive function
  * @param body 
@@ -41,21 +55,8 @@ export type Matches = [HTMLElement | null, HTMLInputElement[]];
  */
 export function getMatches(body: HTMLElement, matches: Matches): Matches {	
     const children = body.querySelectorAll<HTMLElement>(':scope > *');
-	if (validButton(body)) {
-		
-	}
     children.forEach(child => {
-		if (validButton(child)) {
-			console.log('I have found valid button :', child);
-            matches[0] = child;
-        } else if (child.children.length > 0) {
-			const [u, v] = getMatches(child, matches);
-			matches[1] = v;
-			if(u != null)
-			    matches[0] = u;
-        } else if (validInput(child)) {
-            matches[1].push(child as HTMLInputElement);
-        }
+		elementSearch(matches, child);
     });
     return matches;
 }
@@ -63,14 +64,14 @@ export function getMatches(body: HTMLElement, matches: Matches): Matches {
 
 export function labelInput(elt: HTMLInputElement): boolean {
 	let boolean = false;
-	if (elt.type == 'password') {
-		shared.fields.push(new Field(elt, true));
+	if (shared.fields.find((field) => field.input.id === elt.id)) {
+		return false;
+	}
+	if (elt.type == 'password' || elt.type == 'email') {
+		shared.fields.push(new Field(elt, elt.type == 'password'));
 		boolean = true;
-	} else if(elt.form){
-		boolean = true;
-		shared.fields.push(new Field(elt, false));
-	}else{
-		const values: string[] = ['mail', 'username', 'utilisateur', 'user', 'pw'];
+	} else{
+		const values: string[] = ['mail', 'username', 'utilisateur', 'user', 'pw', 'login'];
 		const id = elt.id.toLowerCase(),
 			holder = elt.placeholder.toLowerCase(),
 			name = elt.name;
@@ -83,7 +84,6 @@ export function labelInput(elt: HTMLInputElement): boolean {
 		}
 	}
 	if(boolean){
-		//TODO: fix this
 		observePosition(elt, () => setTimeout(() => shared.refreshFields(), 200));
 		observeSize(elt, () => setTimeout(() => shared.refreshFields(), 200));
 	}
@@ -91,36 +91,26 @@ export function labelInput(elt: HTMLInputElement): boolean {
 }
 
 export function observe(objects:MutationRecord[]){
-	objects
-	/*objects.forEach((record) => {
+	objects.forEach((record) => {
+		let update = false;
 		record.addedNodes.forEach((node)=> {
 			const e = <HTMLElement> node;
-			let matches: Matches;
-			let arr:HTMLElement[] = [];
-			if(e instanceof HTMLDivElement){
-				arr = getMatches(e, []);
-				const btn = getButton(e);
-				if(btn != null){
-					arr.push(btn);
-				}
-			}else{
-				arr.push(e);
+			const matches: Matches = [null, []];
+			elementSearch(matches, e);
+			if (shared.button == null && matches[0] != null) {
+				shared.button = matches[0];
+				update = true;
 			}
-			for(const elt of arr){
-				if(validInput(elt) && labelInput(<HTMLInputElement>elt))
-					message(Script.CONTENT, Script.BACKGROUND, MessageCode.PAGE_UPDATED, buildBody());
-				else if(button == null){
-					const possbtn = getButton(elt);
-					if(validButton(elt))
-						button = elt;
-					if(possbtn != null)
-						button = possbtn;
-					if(button != null){
-						console.log('Button found and labeled :', button);
-						message(Script.CONTENT, Script.BACKGROUND, MessageCode.PAGE_UPDATED, buildBody());
+			if (matches[1].length > 0) {
+				matches[1].forEach((match) => {
+					if (labelInput(match)) {
+						update = true;
 					}
-				}
+				});
 			}
 		});
-	})*/
+		if (update) {
+			shared.sendTabInfo(false);
+		}
+	})
 }

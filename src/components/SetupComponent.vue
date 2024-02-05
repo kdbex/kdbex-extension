@@ -23,7 +23,6 @@
 
 <script lang="ts">
 import { encrypt, post } from './model';
-import { MessageType } from 'app/src-bex/communication';
 
 export default {
   name: 'SetupComponent',
@@ -50,7 +49,7 @@ export default {
         }, false)
         .then((out) => {
           if (out === 'true') {
-            this.$q.bex.send(MessageType.CORRECT_SETUP, {
+            this.$q.bex.send('Setup', {
               url: this.url,
               cryptKey: this.cryptKey,
             });

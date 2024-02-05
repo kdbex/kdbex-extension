@@ -5,7 +5,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { MessageType, Status } from '../../src-bex/communication';
+import { Status } from '../../src-bex/bridge';
 import SetupComponent from 'components/SetupComponent.vue';
 import LoginComponent from 'components/LoginComponent.vue';
 
@@ -21,10 +21,10 @@ export default defineComponent({
     };
   },
   mounted() {
-    this.$q.bex.send(MessageType.GET_STATUS).then((res) => {
+    this.$q.bex.send('GetStatus').then((res) => {
       this.status = res.data;
-    });
-    this.$q.bex.on(MessageType.UPDATE_STATUS, ({ data }) => {
+    })
+    this.$q.bex.on('UpdateStatus', ({ data }) => {
       this.status = data;
     });
   },

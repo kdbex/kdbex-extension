@@ -18,7 +18,6 @@
 </template>
 
 <script lang="ts">
-import { MessageType } from 'app/src-bex/communication';
 import { post } from './model';
 
 export default {
@@ -33,7 +32,7 @@ export default {
     login() {
       post(this.$q.bex, '/login', { keyTH: this.password }, false)
         .then((token) => {
-          this.$q.bex.send(MessageType.CONNECT, token);
+          this.$q.bex.send('Connect', token);
         }).catch((status: number) => {
           if (status == 401) {
             this.msg = 'Wrong password';

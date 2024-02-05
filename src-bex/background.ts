@@ -1,7 +1,6 @@
 import { bexBackground } from 'quasar/wrappers';
-import { MessageType, Status, TabData } from './communication';
+import { Status, TabData } from './bridge';
 import { httpData, get, customhttp } from './http';
-
 let status: Status = Status.SETUP;
 let loaded = false;
 const loaders: ((status: Status) => void)[] = [];
@@ -40,35 +39,36 @@ export function checkCurrentTab() {
 }
 }
 
+
 export default bexBackground((bridge) => {
-  bridge.on(MessageType.GET_STATUS, ({ respond }) => {
+  bridge.on('GetStatus', ({ respond }) => {
     if (!loaded) {
       loaders.push(respond);
     } else {
       respond(status);
     }
   });
-  bridge.on(MessageType.CONNECT, ({ data}) => {
-    httpData.token = data;
-    status = Status.CONNECTED;
-    bridge.send(MessageType.UPDATE_STATUS, Status.CONNECTED);
-    checkCurrentTab();
-  });
-  bridge.on(MessageType.HTTP, ({ data, respond }) => {
+  bridge.on('Http', ({ data, respond }) => {
     customhttp(data.url, data.method, data.data, data.json).then((r) => {
       respond({ data: r, error: false })
     }).catch((e) => {
       respond({data: parseInt(e.message), error: true})
     })
   });
-  bridge.on(MessageType.SET_STATUS, ({ data }) => {
-    status = data;
-    bridge.send(MessageType.UPDATE_STATUS, data);
-    if (status == Status.CONNECTED) {
-      checkCurrentTab();
+  bridge.on('GetStatus', ({ respond }) => {
+    if (!loaded) {
+      loaders.push(respond);
+    } else {
+      respond(status);
     }
   });
-  bridge.on(MessageType.CORRECT_SETUP, ({ data }) => {
+  bridge.on('Connect', ({ data}) => {
+    httpData.token = data;
+    status = Status.CONNECTED;
+    bridge.send('UpdateStatus', Status.CONNECTED);
+    checkCurrentTab();
+  });
+  bridge.on('Setup', ({ data }) => {
     status = Status.LOGIN;
     //We store the url
     chrome.storage.local.set({
@@ -76,9 +76,9 @@ export default bexBackground((bridge) => {
       url: data.url,
       cryptKey: data.cryptKey,
     });
-    bridge.send(MessageType.UPDATE_STATUS, Status.LOGIN);
+    bridge.send('UpdateStatus', Status.LOGIN);
   });
-  bridge.on(MessageType.PAGE_LOADED, ({ data }) => {
+  bridge.on('PageLoaded', ({ data }) => {
     tabs[tabIndex] = data as TabData;
     tabs[tabIndex].has_data = false;
     tabs[tabIndex].need_data = (data.need_username ? 1 : 0) + (data.need_password ? 2 : 0);
