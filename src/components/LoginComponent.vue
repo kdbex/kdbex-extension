@@ -3,9 +3,12 @@
     <q-input
       v-model="password"
       label="Password"
+      type="password"
       dense
       class="q-my-sm"
+      autofocus
       outlined
+      @keyup.enter="login"
       color="primary"
     >
       <template v-slot:prepend>
@@ -30,7 +33,9 @@ export default {
   },
   methods: {
     login() {
-      post(this.$q.bex, '/login', { keyTH: this.password }, false)
+      const pw = this.password;
+      this.password = '';
+      post(this.$q.bex, '/login', { keyTH: pw }, false)
         .then((token) => {
           this.$q.bex.send('Connect', token);
         }).catch((status: number) => {
