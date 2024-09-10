@@ -20,8 +20,6 @@ function before(dev) {
   fs.copyFile(sourcePath, destinationPath, (err) => {
     if (err) {
       console.error('Error copying file:', err);
-    } else {
-      console.log('File copied successfully!');
     }
   });
 }
@@ -30,13 +28,11 @@ function after() {
   fs.unlink(path.resolve(__dirname, './src-bex/manifest.json'), (err) => {
     if (err) {
       console.error('Error deleting file:', err);
-    } else {
-      console.log('File deleted successfully!');
     }
   })
 }
 
-module.exports = configure(function (/*ctx */) {
+module.exports = configure(function (ctx) {
   return {
     eslint: {
       // fix: true,
@@ -89,7 +85,7 @@ module.exports = configure(function (/*ctx */) {
         browser: ['es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
         node: 'node16',
       },
-      distDir: '../output',
+      distDir: ctx.prod ? '../output': './dist/bex',
       vueRouterMode: 'hash', // available values: 'hash', 'history'
       // vueRouterBase,
       // vueDevtools,

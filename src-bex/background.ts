@@ -7,9 +7,8 @@ const loaders: ((status: Status) => void)[] = [];
 const tabs: { [index: number]: TabData } = {}; //The pages that are currently loaded
 let tabIndex = 0; //The tab that is currently active
 let secureUrls: string[] = [];
-console.log('Hey soul ?');
+
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('Installed');
   chrome.storage.local.get(
     ['status', 'url', 'cryptKey', 'secureUrls'],
     (result) => {
@@ -22,7 +21,7 @@ chrome.runtime.onInstalled.addListener(() => {
       if (result.cryptKey) {
         httpData.cryptKey = result.cryptKey;
       }
-      if (result.secureUrls) {
+      if (result.secureUrls) { 
         secureUrls = result.secureUrls;
       }
       loaded = true;

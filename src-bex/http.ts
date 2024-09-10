@@ -54,7 +54,7 @@ export async function customhttp<T extends boolean>(url: string, method: 'GET' |
   const options = {
     method,
     headers: {
-        'Authorization': httpData.token,
+        'Authorization': httpData.token, 
         'Content-Type': 'application/json'
     }
   } as { method: string, headers: { [key: string]: string }, body?: BodyInit };
@@ -67,6 +67,7 @@ export async function customhttp<T extends boolean>(url: string, method: 'GET' |
       throw new Error(r.status.toString());
     }
     if (json) {
+      console.log('Response', await r.json())
       return response(await r.json()) as HttpBody<T>;
     }
     return r.text()
