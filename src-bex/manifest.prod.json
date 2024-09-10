@@ -6,6 +6,7 @@
     "48": "icons/icon-48x48.png",
     "128": "icons/icon-128x128.png"
   },
+  "name": "Kdbex Extension", 
 
   "permissions": ["storage", "tabs", "activeTab"],
   "host_permissions": ["*://*/*"],

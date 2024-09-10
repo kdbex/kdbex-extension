@@ -9,8 +9,34 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
 const { configure } = require('quasar/wrappers');
+const fs = require('fs');
+const path = require('path');
 
-module.exports = configure(function (/* ctx */) {
+function before(dev) {
+  const sourcePath = path.resolve(__dirname, `./src-bex/manifest.${dev ? 'dev' : 'prod'}.json`);
+  const destinationPath = path.resolve(__dirname, './src-bex/manifest.json');
+
+  // Copy the file
+  fs.copyFile(sourcePath, destinationPath, (err) => {
+    if (err) {
+      console.error('Error copying file:', err);
+    } else {
+      console.log('File copied successfully!');
+    }
+  });
+}
+
+function after() {
+  fs.unlink(path.resolve(__dirname, './src-bex/manifest.json'), (err) => {
+    if (err) {
+      console.error('Error deleting file:', err);
+    } else {
+      console.log('File deleted successfully!');
+    }
+  })
+}
+
+module.exports = configure(function (/*ctx */) {
   return {
     eslint: {
       // fix: true,
@@ -45,14 +71,25 @@ module.exports = configure(function (/* ctx */) {
       'roboto-font', // optional, you are not bound to it
       'material-icons', // optional, you are not bound to it
     ],
-
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#build
     build: {
+      beforeDev: async () => {
+        before(true)
+      },
+      afterDev: async () => {
+        after()
+      },
+      beforeBuild: async () => {
+        before(false)
+      },
+      afterBuild: async () => {
+        after()
+      },
       target: {
         browser: ['es2019', 'edge88', 'firefox78', 'chrome87', 'safari13.1'],
         node: 'node16',
       },
-
+      distDir: '../output',
       vueRouterMode: 'hash', // available values: 'hash', 'history'
       // vueRouterBase,
       // vueDevtools,
@@ -192,7 +229,6 @@ module.exports = configure(function (/* ctx */) {
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/developing-browser-extensions/configuring-bex
     bex: {
       contentScripts: ['content-script'],
-
       // extendBexScriptsConf (esbuildConf) {}
       // extendBexManifestJson (json) {}
     },

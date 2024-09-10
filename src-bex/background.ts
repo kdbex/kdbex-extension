@@ -7,8 +7,9 @@ const loaders: ((status: Status) => void)[] = [];
 const tabs: { [index: number]: TabData } = {}; //The pages that are currently loaded
 let tabIndex = 0; //The tab that is currently active
 let secureUrls: string[] = [];
-
+console.log('Hey soul ?');
 chrome.runtime.onInstalled.addListener(() => {
+  console.log('Installed');
   chrome.storage.local.get(
     ['status', 'url', 'cryptKey', 'secureUrls'],
     (result) => {
@@ -25,6 +26,7 @@ chrome.runtime.onInstalled.addListener(() => {
         secureUrls = result.secureUrls;
       }
       loaded = true;
+      loaders.forEach((l) => l(status));
     }
   );
 });
@@ -60,6 +62,7 @@ export async function checkCurrentTab(): Promise<KdbexEntry[] | null> {
 
 export default bexBackground((bridge) => {
   bridge.on('GetStatus', ({ respond }) => {
+    console.log('GetStatus', loaded, status);
     if (!loaded) {
       loaders.push(respond);
     } else {
@@ -74,13 +77,6 @@ export default bexBackground((bridge) => {
       .catch((e) => {
         respond({ data: parseInt(e.message), error: true });
       });
-  });
-  bridge.on('GetStatus', ({ respond }) => {
-    if (!loaded) {
-      loaders.push(respond);
-    } else {
-      respond(status);
-    }
   });
   bridge.on('Connect', async ({ data }) => {
     httpData.token = data;
@@ -120,5 +116,12 @@ export default bexBackground((bridge) => {
     chrome.storage.local.set({
       secureUrls
     })
+  });
+  bridge.on('CurrentData', ({respond}) => {
+    const data = tabs[tabIndex];
+    respond(data ? [data.url, data.selected] : null);
+  });
+  bridge.on('EntrySelected', ({ data }) => {
+    tabs[tabIndex].selected = data;
   });
 });

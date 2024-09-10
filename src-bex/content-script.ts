@@ -3,9 +3,9 @@
 
 import { bexContent } from 'quasar/wrappers';
 import { Field } from './field';
-import { getMatches, labelInput, observe } from './dom-search';
+import { getMatches, labelInput, observe, validButton, validInput } from './dom-search';
 import { BexBridge } from '@quasar/app-vite';
-import { KdbexEntry } from './bridge';
+import { KdbexEntry, tabsOn } from './bridge';
 window.addEventListener('load', () => onPageLoaded());
 const url = window.location.href.split('://')[1].split('/')[0];
 
@@ -38,17 +38,67 @@ export const shared = {
     this.refreshFields();
     const nu = shared.fields.filter((f) => f.pw === false).length > 0;
     const np = shared.fields.filter((f) => f.pw === true).length > 0;
-    shared.bridge.send(loaded ? 'PageLoaded' : 'PageLoaded', {
-      url,
-      need_username: nu,
-      need_password: np,
-    }).then(({ data }) => fillEntry(data));
-  }
+    shared.bridge
+      .send(loaded ? 'PageLoaded' : 'PageUpdated', {
+        url,
+        need_username: nu,
+        need_password: np,
+      })
+      .then(({ data }) => fillEntry(data));
+  },
 };
+
 export default bexContent((bridge) => {
   shared.bridge = bridge;
-  bridge.on('ServiceConnected', ({ data}) => {
+  bridge.on('ServiceConnected', ({ data }) => {
     fillEntry(data);
+  });
+  tabsOn('EntrySelected', ({ data }) => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    shared.fillEntry(shared.entries.find((e) => e.id === data)!);
+  });
+  tabsOn('InputCheck', ({ data, respond }) => {
+    let str = '';
+    let element = document.getElementById(data);
+    if (!element) {
+      const arr = document.getElementsByClassName(data);
+      if (arr.length > 0) {
+        element = arr[0] as HTMLElement;
+      }
+    }
+    if (element) {
+      str += 'Valid input : ' + validInput(element) + '\n';
+      labelInput(
+        element as HTMLInputElement,
+        (...info: unknown[]) => {
+          str += info.join(' ') + '\n';
+        }
+      );
+    } else {
+      str = 'No element found with this id.';
+    }
+    respond(str);
+  });
+  tabsOn('ButtonCheck', ({ data, respond }) => {
+    let str = '';
+    let element = document.getElementById(data);
+    if (!element) {
+      const arr = document.getElementsByClassName(data);
+      if (arr.length > 0) {
+        element = arr[0] as HTMLElement;
+      }
+    }
+    if (element) {
+      validButton(element, (...info: unknown[]) => {
+        str += info.join(' ') + '\n';
+      }) + '\n';
+    } else {
+      str = 'No element found with this id.';
+    }
+    respond(str);
+  });
+  tabsOn('GetFields', ({ respond }) => {
+    respond([shared.button?.id ? shared.button.className : shared.button?.id, shared.fields.map((f) => f.input.id === '' ? f.input.className : f.input.id)]);
   });
 });
 
@@ -56,7 +106,6 @@ function fillEntry(data: KdbexEntry[] | null) {
   shared.status = shared.button ? TabState.DATA : TabState.NODATA;
   shared.refreshFields();
   if (data) {
-    console.log('data sent is', data);
     shared.entries = data;
     shared.fillEntry(shared.entries[0]);
   }
@@ -77,7 +126,7 @@ function onPageLoaded() {
     shared.button = matches[0];
     matches[1].forEach((match) => labelInput(match));
     shared.refreshFields();
-  } 
+  }
   shared.sendTabInfo(true);
   /*shared.bridge
     .send(MessageType.PAGE_LOADED, {

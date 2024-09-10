@@ -24,7 +24,8 @@ export function validInput(elt: HTMLElement): boolean {
  * @param elt
  * @returns
  */
-export function validButton(elt: HTMLElement): boolean {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any, @typescript-eslint/no-empty-function
+export function validButton(elt: HTMLElement, log: (...info: any[]) => void = () => {}): boolean {
   const L = [
     'suivant',
     'next',
@@ -47,18 +48,25 @@ export function validButton(elt: HTMLElement): boolean {
   }
   let str = new XMLSerializer().serializeToString(elt);
   str = str.substring(0, str.indexOf('>'));
+  if (elt.clientHeight == 0 || elt.clientWidth == 0) {
+    log('Element is not visible');
+  }
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  log('Onclick', str.includes('onclick'), f(elt.textContent!));
+  if (elt instanceof HTMLInputElement || elt instanceof HTMLButtonElement) {
+    log('Type', elt.type == 'submit' || elt.type == 'button', elt.tabIndex >= 0);
+    log('Values', elt.value, elt.id, elt.textContent);
+  }
   return (
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    ((str.includes('onclick') && f(elt.textContent!)) ||
-      ((elt instanceof HTMLInputElement || elt instanceof HTMLButtonElement) &&
-        (elt.type == 'submit' || elt.type == 'button') &&
-        elt.tabIndex >= 0 &&
-        (f(elt.value) ||
-          f(elt.id) ||
-          (elt.textContent != null && f(elt.textContent))))) &&
-    elt.clientHeight > 0 &&
-    elt.clientWidth > 0
-  );
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      ((str.includes('onclick') && f(elt.textContent!)) ||
+        ((elt instanceof HTMLInputElement || elt instanceof HTMLButtonElement) &&
+          (elt.type == 'submit' || elt.type == 'button') &&
+          elt.tabIndex >= 0 &&
+          Array.from(elt.attributes).find(attr => attr.value != null && f(attr.value)) !== undefined)) &&
+      elt.clientHeight > 0 &&
+      elt.clientWidth > 0
+    );
 }
 
 export type Matches = [HTMLElement | null, HTMLInputElement[]];
@@ -89,13 +97,16 @@ export function getMatches(body: HTMLElement, matches: Matches): Matches {
   return matches;
 }
 
-export function labelInput(elt: HTMLInputElement): boolean {
+// eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-explicit-any
+export function labelInput(elt: HTMLInputElement, log: (...info: any[]) => void = () => {}): boolean {
   let boolean = false;
   if (shared.fields.find((field) => field.input.id === elt.id)) {
+    log('Already labeled');
     return false;
   }
   if (elt.type == 'password' || elt.type == 'email') {
     shared.fields.push(new Field(elt, elt.type == 'password'));
+    log('Labeled input because of its type', elt.type);
     boolean = true;
   } else {
     const values: string[] = [
@@ -109,6 +120,7 @@ export function labelInput(elt: HTMLInputElement): boolean {
     const id = elt.id.toLowerCase(),
       holder = elt.placeholder.toLowerCase(),
       name = elt.name;
+    log('Trying to find values matching', id, holder, name);
     for (const value of values) {
       if (
         id.includes(value) ||
@@ -117,10 +129,12 @@ export function labelInput(elt: HTMLInputElement): boolean {
       ) {
         shared.fields.push(new Field(elt, false));
         boolean = true;
+        log('Found a match with', value);
         break;
       }
     }
   }
+  log('Trying to find a form', elt.form != null, shared.button != null);
   if (!boolean && elt.form && shared.button) {
     const form = elt.form;
     let btn: HTMLElement | null = shared.button;
@@ -130,6 +144,7 @@ export function labelInput(elt: HTMLInputElement): boolean {
         break;
       }
     }
+    log('Found relative button for form', btn, form);
     if (btn && btn == form) {
       shared.fields.push(new Field(elt, false));
       boolean = true;

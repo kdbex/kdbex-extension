@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "icons": {
+    "128": "icons/icon-dev-128x128.png"
+  },
+  "name": "Kdbex Extension [DEV]", 
+
+  "permissions": ["storage", "tabs", "activeTab"],
+  "host_permissions": ["*://*/*"],
+
+  "action": {
+    "default_popup": "www/index.html"
+  },
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["https://*/*", "http://*/*"],
+      "css": ["assets/content.css"],
+      "js": ["content-script.js"]
+    }
+  ],
+
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  },
+
+  "web_accessible_resources": [
+    {
+      "resources": ["*"],
+      "matches": ["*://*/*"]
+    }
+  ]
+}
