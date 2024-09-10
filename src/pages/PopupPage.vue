@@ -24,9 +24,7 @@ export default defineComponent({
     };
   },
   mounted() {
-    console.log('Im mounted');
     this.$q.bex.send('GetStatus').then((res) => {
-      console.log(res.data);
       this.status = res.data;
     })
     this.$q.bex.on('UpdateStatus', ({ data }) => {

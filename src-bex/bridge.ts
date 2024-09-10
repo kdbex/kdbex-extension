@@ -37,7 +37,6 @@ export function tabsSend<T extends BexEventName>(
   return new Promise(async (resolve) => {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const id = (await chrome.tabs.query({active: true, currentWindow: true}))[0].id!;
-    console.log('Sending to id', id);
     chrome.tabs.sendMessage(id, {
       eventName,
       payload

@@ -27,7 +27,6 @@ function response(data: { [key: string]: unknown }): unknown {
       const cp = data[key] as { [key: string]: unknown };
       obj[key] = response(cp);
     } else if (key.endsWith('Hash')) {
-      console.log('ui')
       obj[key.substring(0, key.length - 4)] = decrypt(
           data[key] as string,
           httpData.cryptKey
@@ -67,7 +66,6 @@ export async function customhttp<T extends boolean>(url: string, method: 'GET' |
       throw new Error(r.status.toString());
     }
     if (json) {
-      console.log('Response', await r.json())
       return response(await r.json()) as HttpBody<T>;
     }
     return r.text()

@@ -61,7 +61,6 @@ export async function checkCurrentTab(): Promise<KdbexEntry[] | null> {
 
 export default bexBackground((bridge) => {
   bridge.on('GetStatus', ({ respond }) => {
-    console.log('GetStatus', loaded, status);
     if (!loaded) {
       loaders.push(respond);
     } else {
