@@ -15,10 +15,13 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
+    "@webext-core/messaging": "^2.2.0",
+    "crypto-js": "^4.2.0",
     "vue": "^3.5.12"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.280",
+    "@types/crypto-js": "^4.2.2",
     "@wxt-dev/module-vue": "^1.0.1",
     "typescript": "5.6.3",
     "vue-tsc": "^2.1.10",
