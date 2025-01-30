@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { sendMessage } from '@/utils/messaging';
 
-
 const url = ref('')
 const token = ref('')
 const message = ref('')
@@ -21,15 +20,14 @@ function setup() {
 </script>
 
 <template>
-    <div class="">
-        <h1>Setup</h1>
-        <input type="text" v-model="url" placeholder="URL">
-        <input type="text" v-model="token" placeholder="Token">
-        <button @click="setup">Test setup</button>
-        {{ message }}
-    </div>    
+    <div class="container">
+        <h3>Setup</h3>
+        <input type="text" v-model="url" placeholder="URL" class="my-sm pa-xs">
+        <input type="text" v-model="token" placeholder="Token" class="my-sm pa-xs">
+        <button @click="setup" class="my-sm">Test setup</button>
+        {{ message }}   
+    </div>
 </template>
 
 <style lang="css" scoped>
-
 </style>
