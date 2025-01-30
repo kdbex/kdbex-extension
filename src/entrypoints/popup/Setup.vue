@@ -9,10 +9,9 @@ function setup() {
     sendMessage('testSetup', { url: url.value, token: token.value })
         .then((response) => response).then((response) => {
             if(response) {
-                message.value = 'Setup successful'
                 sendMessage('validateSetup', { url: url.value, token: token.value })
             } else {
-                message.value = 'Setup failed'
+                message.value = 'Settings are invalid'
             }
         })
 }
@@ -21,10 +20,9 @@ function setup() {
 
 <template>
     <div class="container">
-        <h3>Setup</h3>
-        <input type="text" v-model="url" placeholder="URL" class="my-sm pa-xs">
-        <input type="text" v-model="token" placeholder="Token" class="my-sm pa-xs">
-        <button @click="setup" class="my-sm">Test setup</button>
+        <input type="text" v-model="url" placeholder="URL" class="my-sm">
+        <input type="text" v-model="token" placeholder="Token" class="my-sm">
+        <button @click="setup" class="my-sm">Save settings</button>
         {{ message }}   
     </div>
 </template>

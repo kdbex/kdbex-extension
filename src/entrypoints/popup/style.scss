@@ -1,3 +1,10 @@
+@use 'sass:color';
+
+@function primarydarken($percentage) {
+  @return color.mix($primary, #000000, $percentage);
+}
+
+$primary: #5878d3;
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -5,8 +12,8 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: rgba(36, 36, 36, 0.87);
+  background-color: #e2e2e2;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -15,36 +22,12 @@
   -webkit-text-size-adjust: 100%;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
 body {
   margin: 0;
   display: flex;
   flex-direction: column;
   place-items: center;
   min-width: 250px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
 }
 
 button {
@@ -54,26 +37,29 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: primarydarken(40%);
   cursor: pointer;
   transition: border-color 0.25s;
 }
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+
+input{
+  border-radius: 8px;
+  border: 1px solid primarydarken(10%);
+  @extend .pa-sm;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #c7c7c7;
 }
 
-.card {
-  padding: 2em;
+input:focus,
+input:focus-visible {
+  outline: none;
 }
 
 #app {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
   text-align: center;
 }
 
@@ -87,10 +73,10 @@ button:focus-visible {
   flex-direction: row;
   width: 100%;
   justify-content: flex-start;
-  align-items: flex-end;
 }
 
 $spaces: (
+  none: 0px,
   xs: 4px,
   sm: 8px,
   md: 16px,
@@ -105,10 +91,10 @@ $orientations: ('l', 'r', 't', 'b', 'a', 'x', 'y');
   @each $dir in $orientations {
     @each $key, $value in $spaces {
       .#{$prefix}#{$dir}-#{$key} {
-        #{$property}-top: if($dir == 't' or $dir == 'a' or $dir == 'y', $value, unset);
-        #{$property}-right: if($dir == 'r' or $dir == 'a' or $dir == 'x', $value, unset);
-        #{$property}-bottom: if($dir == 'p' or $dir == 'a' or $dir == 'y', $value, unset);
-        #{$property}-left: if($dir == 'l' or $dir == 'a' or $dir == 'x', $value, unset);
+        #{$property}-top: if($dir == 't' or $dir == 'a' or $dir == 'y', $value !important, inherit);
+        #{$property}-right: if($dir == 'r' or $dir == 'a' or $dir == 'x', $value !important, inherit);
+        #{$property}-bottom: if($dir == 'p' or $dir == 'a' or $dir == 'y', $value !important, inherit);
+        #{$property}-left: if($dir == 'l' or $dir == 'a' or $dir == 'x', $value !important, inherit);
       }
     }
   }
