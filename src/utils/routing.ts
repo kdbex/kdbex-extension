@@ -1,5 +1,6 @@
 export enum Router {
     Login,
-    Setup
+    Setup,
+    Main
   }
   

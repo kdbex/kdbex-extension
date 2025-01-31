@@ -1,11 +1,22 @@
 <script lang="ts" setup>
 
-const text = ref('Hello, World!');
+const password = ref('');
+const shake = ref(false);
 function login() {
-    
+    let pw = password.value;
+    password.value = '';
+    sendMessage('login', pw).then((v) => v).then((resp) => {
+        shake.value = !resp;
+        setTimeout(() => {
+            shake.value = false;
+        }, 1500);
+    })
 }
 </script>
 
 <template>
-    <button @click="login">{{text}}</button>
+   <div class="container">
+    <input type="password" v-model="password" class="my-sm" placeholder="Password"/>
+    <button @click="login" :class="{ shake: shake}" class="my-md">Login</button>
+   </div>
 </template>

@@ -12,3 +12,11 @@ export const storageServerUrl = storage.defineItem<string>(
 export const storageToken = storage.defineItem<string>(
     'local:token'
 )
+
+export async function getToken() {
+    return (await storageToken.getValue())!!;
+}
+
+export async function getURL() {
+    return (await storageServerUrl.getValue())!!;
+}

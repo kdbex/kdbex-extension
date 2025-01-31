@@ -19,7 +19,7 @@ function generatePassword(): string {
 	return pw;
 }
 
-async function post(url: string, body: any): Promise<number | any> {
+async function post(url: string, body: any, json: boolean = true): Promise<number | any> {
     const response = await fetch(url, {
         method: 'POST',
         mode: 'cors',
@@ -29,10 +29,11 @@ async function post(url: string, body: any): Promise<number | any> {
         },
         body: JSON.stringify(body),
     })
-    return response.ok ? await response.json() : response.status;
+    return response.ok ? await (json ? response.json() : response.text()) : response.status;
 }
 
 var router: Router;
+var sessionToken: string;
 
 export default defineBackground(() => {
   onMessage('testSetup', async ({ data }) =>{
@@ -44,7 +45,7 @@ export default defineBackground(() => {
     storageHasSetup.setValue(true)
     storageServerUrl.setValue(data.url)
     storageToken.setValue(data.token)
-    sendMessage('movePopup', Router.Login)
+    sendMessage('refreshPopup', Router.Login)
   });
   onMessage('getPopup', async () => {
     if(router) {
@@ -52,5 +53,17 @@ export default defineBackground(() => {
     }
     let loaded = await storageHasSetup.getValue();
     return loaded ? Router.Login : Router.Setup;
+  });
+  onMessage('login', async ({ data }) => {
+    let hash = encrypt(data, await getToken());
+    let value = await post(await getURL() + '/login', { key: hash }, false);
+    if(typeof value == 'number') {
+      return false;
+    } else {
+      sessionToken = value;
+      router = Router.Main;
+      sendMessage('refreshPopup', Router.Main);
+      return true;
+    }
   });
 });
