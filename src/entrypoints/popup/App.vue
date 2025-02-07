@@ -9,7 +9,7 @@ const router = ref(Router.Setup)
 onMessage('refreshPopup', data => {
   router.value = data.data
 })
-sendMessage('getPopup', undefined).then((r) => r).then((r) => {
+sendMessage('getPopup', undefined).then((r) => {
   router.value = r
 })
 

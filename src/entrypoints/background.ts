@@ -2,6 +2,7 @@ import { encrypt } from "@/utils/crypt";
 import { onMessage } from "../utils/messaging";
 import { storageHasSetup } from "@/utils/storage";
 import { Router } from "@/utils/routing";
+import { KdbexEntry } from "@/utils/model";
 
 
 function generatePassword(): string {
@@ -26,10 +27,24 @@ async function post(url: string, body: any, json: boolean = true): Promise<numbe
         headers: {
             'Content-Type': 'application/json',
             'Access-Control-Allow-Origin': '*',
+            'Authorization': sessionToken
         },
         body: JSON.stringify(body),
     })
     return response.ok ? await (json ? response.json() : response.text()) : response.status;
+}
+
+async function get(url: string, json: boolean = true): Promise<number | any> {
+  const response = await fetch(url, {
+      method: 'GET',
+      mode: 'cors',
+      headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'Authorization': sessionToken
+      }
+  })
+  return response.ok ? await (json ? response.json() : response.text()) : response.status;
 }
 
 var router: Router;
@@ -65,5 +80,19 @@ export default defineBackground(() => {
       sendMessage('refreshPopup', Router.Main);
       return true;
     }
+  });
+  onMessage('queryTabData', async ({ data }) => {
+    if(sessionToken == undefined) {
+      return undefined;
+    }
+    let value = await get(await getURL() + `/entries/url/${data.url}/${data.code}`);
+    if(typeof value == 'number') {
+      return undefined;
+    }
+    let v = (value as KdbexEntry[])[0];
+    return {
+      username: v.username ? v.username : "",
+      password: v.passwordHash ? decrypt(v.passwordHash, await getToken()) : ""
+    };
   });
 });

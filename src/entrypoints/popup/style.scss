@@ -1,10 +1,17 @@
 @use 'sass:color';
+@use "sass:map";
 
 @function primarydarken($percentage) {
   @return color.mix($primary, #000000, $percentage);
 }
 
 $primary: #5878d3;
+$dark: rgba(36, 36, 36, 0.87);
+$primary-darken-10: primarydarken(10%);
+$primary-darken-40: primarydarken(40%);
+$primary-darken-60: primarydarken(60%);
+$primary-darken-80: primarydarken(80%);
+$primary-darken-90: primarydarken(90%);
 
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -58,14 +65,9 @@ input:focus-visible {
 }
 
 #app {
-  max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
   text-align: center;
-}
-
-.container {
-  display: flex;
-  flex-direction: column;
 }
 
 .header {
@@ -129,4 +131,15 @@ $orientations: ('l', 'r', 't', 'b', 'a', 'x', 'y');
   60% {
     transform: translate3d(4px, 0, 0);
   }
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  @extend .ma-md;
+}
+
+.kdbex-decorator {
+  position: absolute;
+  margin-left: 5px;
 }
