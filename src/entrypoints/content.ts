@@ -5,6 +5,11 @@ export default defineContentScript({
     if (matches instanceof Array) {
       matches.forEach((match) => decorateMatch(match));
     }
+    const forms = matches instanceof Array ? matches.length : 0;
+    sendMessage('setTabInfo', {
+      forms: forms,
+      url: getBaseUrl(document.location.href)
+    })
   },
 });
 
@@ -45,7 +50,7 @@ function decorateMatch(match: Match) {
       userField
     );
     const code = (pwField ? 2 : 0) + (userField ? 1 : 0);
-    sendMessage("queryTabData", {
+    /*sendMessage("queryTabData", {
       code: code,
       url: getBaseUrl(document.location.href),
     }).then((entry) => {
@@ -58,7 +63,7 @@ function decorateMatch(match: Match) {
           }
         });
       }
-    });
+    });*/
   };
   document.body.appendChild(child);
 }

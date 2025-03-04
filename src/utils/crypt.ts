@@ -34,3 +34,18 @@ export function decrypt(encryptedData: string, pass: string) {
 
     return decrypted.toString(CryptoJS.enc.Utf8); // Convert decrypted data to UTF-8
 }
+
+export function generatePassword(): string {
+    const lowCase = "abcdefghijklmnopqrstuvxyz";
+    const upCase = "ABCDEFGHIJKLMNOPQRSTUVXYZ";
+    const numbers = "0123456789";
+    const spec = "£$&()*+[]@#^-_!?";
+    const arrays = [lowCase, upCase, numbers, spec];
+    let size = 20;
+    let pw = "";
+    for (let i = 0; i < size; i++) {
+      let arr = arrays[Math.floor(arrays.length * Math.random())];
+      pw += arr.charAt(Math.floor(arr.length * Math.random()));
+    }
+    return pw;
+  }

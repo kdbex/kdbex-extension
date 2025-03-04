@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { SharedEntry } from "@/utils/messaging";
-import { KdbexEntry } from "@/utils/model";
 
 const homeTab = ref(true);
 
@@ -8,68 +7,58 @@ function setTab(tab: boolean) {
   homeTab.value = tab;
 }
 
-const field = ref(0);
-const entries = ref([] as SharedEntry[]);
+const forms = ref(0);//Number of forms on the page
+const url = ref("");//URL of the page
+const entries = ref([] as SharedEntry[]);//List of entries one can fill in
 const selectedEntry = ref(undefined as string | undefined);
 
-sendMessage("queryPopupData", undefined).then((res) => {
+sendMessage("queryTabData", undefined).then((res) => {
   if (res) {
     entries.value = res.entries;
-    field.value = res.fields;
-    selectedEntry.value = res.selected;  
-  } else {
-    entries.value = [];
-    field.value = 0;
+    forms.value = res.forms;
+    url.value = res.url; 
+    selectedEntry.value = res.selected;
   }
 });
 
 const filterInput = ref("");
 const nameFilteredEntries = ref([] as SharedEntry[]); 
+const selectedFilteredEntry = ref(undefined as string | undefined);
+
+function updateEntryURL() {
+  sendMessage('updateEntryURL', selectedFilteredEntry.value!!)
+}
 
 function filterEntries() {
-  console.log(filterInput.value);
+  sendMessage('getEntriesByName', filterInput.value).then((res) => {
+    nameFilteredEntries.value = res;
+  });
 }
 </script>
 
 <template>
-  <div class="container" style="align-items: center">
-    <div>
-      <div v-if="homeTab">
-        <span v-if="field > 0">{{ field }} forms detected on the page</span>
-        <span v-else>No forms detected on the page</span>
-        <!--select entry-->
-        <select v-if="entries.length > 0" v-model="selectedEntry" @select="sendMessage('selectEntry', selectedEntry!!)">
-          <option
-            v-for="entry in entries"
-            :key="entry.id"
-            :value="entry.id"
-            >{{ entry.name }}</option
-          >
-        </select>
-        <input v-model="filterInput" @change="filterEntries"/>
-      </div>
-      <div v-if="!homeTab"></div>
-    </div>
-    <div class="drawer mt-md">
-      <div
-        class="bg pa-sm"
-        :class="{
-          ml: homeTab,
-          mr: !homeTab,
-        }"></div>
-      <span
-        class="material-symbols-outlined pa-sm icon"
-        :class="{ active: homeTab }"
-        @click="setTab(true)"
-        >home</span
-      >
-      <span
-        class="material-symbols-outlined pa-sm icon"
-        :class="{ active: !homeTab }"
-        @click="setTab(false)"
-        >edit</span
-      >
-    </div>
+  <div class="container">
+    <span>
+      <span style="font-weight: bold;">URL:</span>
+      {{ url }}
+    </span>
+    <span>
+      <span style="font-weight: bold;">Login forms detected:</span>
+      {{ forms }}
+    </span>
+  </div>
+  <hr style="width: 100vw"/>
+  <div class="container">
+    <span>Selected entry</span>
+    <select v-model="selectedEntry">
+      <option v-for="entry in entries" :value="entry.id">{{ entry.name }}</option>
+    </select>
+    <span>Link entry</span>
+    <input type="text" v-model="filterInput" @change="filterEntries">
+    <select v-model="selectedFilteredEntry">
+      <option v-for="entry in nameFilteredEntries" :value="entry.id">{{ entry.name }}</option>
+    </select>
+    <button @click="updateEntryURL" :disabled="selectedFilteredEntry == undefined">Link entry</button>
   </div>
 </template>
 

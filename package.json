@@ -17,11 +17,13 @@
   "dependencies": {
     "@webext-core/messaging": "^2.2.0",
     "crypto-js": "^4.2.0",
-    "vue": "^3.5.12"
+    "vue": "^3.5.12",
+    "vue-select": "^3.20.4"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.280",
     "@types/crypto-js": "^4.2.2",
+    "@types/vue-select": "^3.16.8",
     "@wxt-dev/module-vue": "^1.0.1",
     "sass-embedded": "^1.83.4",
     "typescript": "5.6.3",
